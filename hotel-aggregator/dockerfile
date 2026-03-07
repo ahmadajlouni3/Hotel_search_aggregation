@@ -17,6 +17,8 @@ WORKDIR /home/ubuntu
 # Make sure to replace './hotel-aggregator' with your actual host path
 COPY ./ /home/ubuntu
 
+RUN ls
+
 # Expose port 8080
 EXPOSE 8080
 
