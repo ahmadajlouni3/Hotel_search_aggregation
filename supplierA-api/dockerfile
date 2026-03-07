@@ -22,13 +22,13 @@ RUN apt-get update && \
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
     a2enmod rewrite
 
-# Allow .htaccess overrides for routing
+# Allow .htaccess overrides
 RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 
-# DocumentRoot can remain as html (no front-end), just make sure index.php is reachable
+# Set DocumentRoot to /var/www/html
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html|g' /etc/apache2/sites-available/000-default.conf
 
-# Enable PHP error reporting for easier debugging
+# Enable PHP error reporting
 RUN echo "display_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "display_startup_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "error_reporting = E_ALL" >> /etc/php/8.3/apache2/php.ini
@@ -36,10 +36,18 @@ RUN echo "display_errors = On" >> /etc/php/8.3/apache2/php.ini && \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy your CodeIgniter project (backend only)
+# Copy CodeIgniter backend code
 COPY ./ /var/www/html
 
-# Fix CodeIgniter writable permissions
+# Create .htaccess automatically
+RUN echo '<IfModule mod_rewrite.c>\n\
+RewriteEngine On\n\
+RewriteCond %{REQUEST_FILENAME} !-f\n\
+RewriteCond %{REQUEST_FILENAME} !-d\n\
+RewriteRule ^(.*)$ index.php/$1 [L]\n\
+</IfModule>' > /var/www/html/.htaccess
+
+# Fix writable folder permissions
 RUN chown -R www-data:www-data /var/www/html/writable && \
     chmod -R 775 /var/www/html/writable
 
