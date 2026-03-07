@@ -1,12 +1,14 @@
 # Dockerfile
 FROM php:8.2-cli
 
-
 # Set working directory
 WORKDIR /app
 
 # Copy app code into container
 COPY . /app
 
-# Expose Apache port
-EXPOSE 80
+# Expose the port that php spark serve will use
+EXPOSE 8080
+
+# Run CodeIgniter development server on container start
+CMD ["php", "spark", "serve", "--host=0.0.0.0", "--port=8080"]
