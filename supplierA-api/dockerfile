@@ -18,17 +18,16 @@ RUN apt-get update && \
         libicu-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache modules and fix ServerName warning
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf && \
-    a2enmod rewrite
+# Enable Apache rewrite and fix ServerName warning
+RUN a2enmod rewrite && echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Allow .htaccess overrides for routing
-RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+# Allow .htaccess overrides
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Change Apache DocumentRoot to CodeIgniter public folder
+# Set Apache DocumentRoot to CI public folder
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Enable PHP error reporting for easier debugging
+# Enable PHP error reporting for debugging
 RUN echo "display_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "display_startup_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "error_reporting = E_ALL" >> /etc/php/8.3/apache2/php.ini
@@ -36,19 +35,19 @@ RUN echo "display_errors = On" >> /etc/php/8.3/apache2/php.ini && \
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# Copy backend project files
 COPY ./ /var/www/html
 
-# Rename search page to main page (if exists)
-RUN if [ -f /var/www/html/public/search.html ]; then \
-        mv /var/www/html/public/search.html /var/www/html/public/index.html; \
-    fi
+# Install Composer (for dependencies)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Fix CodeIgniter writable permissions recursively
-RUN chown -R www-data:www-data /var/www/html/writable && \
-    chmod -R 775 /var/www/html/writable
+# Install PHP dependencies for CI4
+RUN composer install --no-dev --optimize-autoloader
 
-# Create .htaccess inside public/ for CI4 routing
+# Fix writable permissions for logs/cache
+RUN chown -R www-data:www-data /var/www/html/writable && chmod -R 775 /var/www/html/writable
+
+# Add .htaccess to public/ to route all requests through index.php
 RUN echo '<IfModule mod_rewrite.c>\n\
 RewriteEngine On\n\
 RewriteCond %{REQUEST_FILENAME} !-f\n\
@@ -56,7 +55,7 @@ RewriteCond %{REQUEST_FILENAME} !-d\n\
 RewriteRule ^(.*)$ index.php/$1 [L]\n\
 </IfModule>' > /var/www/html/public/.htaccess
 
-# Expose web port
+# Expose Apache port
 EXPOSE 80
 
 # Start Apache in foreground
