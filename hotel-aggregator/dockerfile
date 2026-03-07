@@ -7,10 +7,10 @@ RUN apt-get update && apt-get install -y php-cli php-mbstring php-xml php-intl u
 RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf
 
 # Set working directory inside container
-WORKDIR /home/ubuntu
+WORKDIR /var/www/html
 
 # Copy application code from host to container
 # Make sure to replace './hotel-aggregator' with your actual host path
-COPY ./ /home/ubuntu
+COPY ./ /var/www/html
 
 CMD ['service', 'apache2', 'start']
