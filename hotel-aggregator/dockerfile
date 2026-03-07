@@ -1,17 +1,30 @@
-# Dockerfile
-FROM php:8.2-cli
+# Use latest Ubuntu as base
+FROM ubuntu:latest
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Set working directory
-WORKDIR /app
+# Install PHP, required extensions, and other tools
+RUN apt-get update && \
+    apt-get install -y php-cli php-mbstring php-xml unzip curl git libicu-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy app code
-COPY . /app
+# Install Composer globally
+RUN curl -sS https://getcomposer.org/installer | php && \
+    mv composer.phar /usr/local/bin/composer
 
-# Expose port for spark
+# Set working directory inside container
+WORKDIR /home/ubuntu
+
+# Copy application code from host to container
+# Make sure to replace './hotel-aggregator' with your actual host path
+COPY ./ /home/ubuntu
+
+# Expose port 8080
 EXPOSE 8080
 
-# Run CodeIgniter dev server
+# Set environment to production (not development)
+ENV CI_ENVIRONMENT = production
+
+# Run CodeIgniter server on container start
 CMD ["php", "spark", "serve", "--host=0.0.0.0", "--port=8080"]
