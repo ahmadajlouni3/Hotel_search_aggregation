@@ -5,7 +5,7 @@ use App\Libraries\LoggerHelper;
 
 class SupplierBClient
 {
-    protected $baseUrlB = 'http://localhost:8082/mock/supplierB/search';
+    protected $baseUrlB = 'https://hotel-search-aggregation-2.onrender.com/mock/supplierB/search';
 
     public function search(array $params)
     {
