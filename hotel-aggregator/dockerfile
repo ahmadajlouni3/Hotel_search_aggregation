@@ -1,16 +1,24 @@
-# Use latest Ubuntu as base
 FROM ubuntu:latest
 
-# Install PHP, required extensions, and other tools
-RUN apt-get update && apt-get install -y php-cli php-mbstring php-xml php-intl unzip curl git apache2 libicu-dev
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN echo 'ServerName localhost' >> /etc/apache2/apache2.conf
+# Install Apache, PHP and required extensions
+RUN apt-get update && \
+    apt-get install -y apache2 php php-cli php-mbstring php-xml php-intl unzip curl git libicu-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Set working directory inside container
+# Silence Apache ServerName warning
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
+# Set working directory
 WORKDIR /var/www/html
 
-# Copy application code from host to container
-# Make sure to replace './hotel-aggregator' with your actual host path
+# Copy project files
 COPY ./ /var/www/html
 
-CMD ['service', 'apache2', 'start']
+# Expose web port
+EXPOSE 80
+
+# Run Apache in foreground (required for Docker)
+CMD ["apache2ctl", "-D", "FOREGROUND"]
