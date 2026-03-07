@@ -7,7 +7,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install PHP, required extensions, and other tools
 RUN apt-get update && \
     apt-get install -y php-cli php-mbstring php-xml unzip curl git libicu-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer globally
 RUN curl -sS https://getcomposer.org/installer | php && \
