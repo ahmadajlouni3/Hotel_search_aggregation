@@ -1,0 +1,17 @@
+# Dockerfile
+FROM php:8.2-apache
+
+# Install required PHP extensions
+RUN apt-get update && apt-get install -y \
+    libzip-dev unzip git \
+    && docker-php-ext-install zip pdo pdo_mysql intl mbstring \
+    && a2enmod rewrite
+
+# Set working directory
+WORKDIR /app
+
+# Copy app code into container
+COPY . /app
+
+# Expose Apache port
+EXPOSE 80

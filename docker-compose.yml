@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  hotel-aggregator:
+    build: ./hotel-aggregator
+    ports:
+      - "8080:80"
+    volumes:
+      - ./hotel-aggregator:/app   # optional for live code changes
+
+  supplier-A:
+    build: ./supplier-A
+    ports:
+      - "8081:80"
+    volumes:
+      - ./supplier-A:/app
+
+  supplier-B:
+    build: ./supplier-B
+    ports:
+      - "8082:80"
+    volumes:
+      - ./supplier-B:/app
