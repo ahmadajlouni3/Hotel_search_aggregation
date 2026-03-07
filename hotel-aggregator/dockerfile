@@ -16,8 +16,8 @@ WORKDIR /home/ubuntu
 # Copy application code from host to container
 # Make sure to replace './hotel-aggregator' with your actual host path
 COPY ./ /home/ubuntu
-
-RUN composer install --no-dev --optimize-autoloader
+RUN composer -v
+RUN composer install
 
 RUN ls
 
