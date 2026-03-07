@@ -17,6 +17,8 @@ WORKDIR /home/ubuntu
 # Make sure to replace './hotel-aggregator' with your actual host path
 COPY ./ /home/ubuntu
 
+RUN composer install --no-dev --optimize-autoloader
+
 RUN ls
 
 # Expose port 8080
