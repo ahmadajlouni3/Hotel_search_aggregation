@@ -40,6 +40,10 @@ RUN if [ -f /var/www/html/public/search.html ]; then \
     mv /var/www/html/public/search.html /var/www/html/public/index.html; \
     fi
 
+# Fix CodeIgniter writable permissions
+RUN chown -R www-data:www-data /var/www/html/writable
+RUN chmod -R 775 /var/www/html/writable
+
 # Expose web port
 EXPOSE 80
 
