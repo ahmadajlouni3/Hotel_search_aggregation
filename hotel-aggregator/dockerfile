@@ -10,9 +10,6 @@ WORKDIR /app
 # Copy app code
 COPY . /app
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
-
 # Expose port for spark
 EXPOSE 8080
 
