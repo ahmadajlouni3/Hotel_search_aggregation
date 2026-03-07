@@ -25,19 +25,16 @@ function createHotelCard(hotel) {
     const card = document.createElement('div');
     card.className = 'hotel-card';
 
-    // Image
     const img = document.createElement('img');
     img.src = hotel.image || 'https://picsum.photos/seed/picsum/500';
     img.alt = escapeHTML(hotel.name || 'Hotel Image');
     card.appendChild(img);
 
-    // Price badge
     const priceBadge = document.createElement('div');
     priceBadge.className = 'price-badge';
     priceBadge.textContent = '$' + (hotel.price !== undefined ? hotel.price : '0');
     card.appendChild(priceBadge);
 
-    // Content
     const content = document.createElement('div');
     content.className = 'content';
 
@@ -55,18 +52,15 @@ function createHotelCard(hotel) {
     content.appendChild(rating);
 
     card.appendChild(content);
-
     return card;
 }
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
-    // Clear previous results and messages
+
     resultsDiv.innerHTML = '';
-    cacheResult.innerHTML = '';       // ✅ Clear cached badge
+    cacheResult.innerHTML = '';
     warningDiv.style.display = 'none';
-    
     loading.style.display = 'block';
 
     const formData = new FormData(form);
@@ -80,13 +74,24 @@ form.addEventListener('submit', async (e) => {
 
         loading.style.display = 'none';
 
+        // Handle rate-limiting
         if (res.status === 429) {
             warningDiv.textContent = "You are making requests too quickly. Please wait a moment.";
             warningDiv.style.display = 'block';
             return;
         }
 
-        const data = await res.json();
+        // Safely parse JSON or show HTML error
+        const text = await res.text();
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch(err) {
+            console.error('Invalid JSON response:', text);
+            warningDiv.textContent = "Server error: invalid response.";
+            warningDiv.style.display = 'block';
+            return;
+        }
 
         if (!data || !Array.isArray(data.results) || data.results.length === 0) {
             warningDiv.textContent = 'No hotels found.';
@@ -102,7 +107,6 @@ form.addEventListener('submit', async (e) => {
             cacheResult.appendChild(badge);
         }
 
-        // Render hotel cards
         data.results.forEach(hotel => {
             const card = createHotelCard(hotel);
             resultsDiv.appendChild(card);
