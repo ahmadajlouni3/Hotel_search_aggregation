@@ -5,17 +5,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Install Apache + PHP + required extensions
 RUN apt-get update && \
     apt-get install -y \
-    apache2 \
-    php \
-    php-cli \
-    php-mbstring \
-    php-xml \
-    php-intl \
-    php-curl \
-    unzip \
-    curl \
-    git \
-    libicu-dev && \
+        apache2 \
+        php \
+        php-cli \
+        php-mbstring \
+        php-xml \
+        php-intl \
+        php-curl \
+        unzip \
+        curl \
+        git \
+        libicu-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Enable Apache modules and fix ServerName warning
@@ -28,16 +28,10 @@ RUN sed -i 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
 # Change Apache DocumentRoot to CodeIgniter public folder
 RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 
-# Enable PHP error reporting for easier debugging
+# Enable PHP error reporting
 RUN echo "display_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "display_startup_errors = On" >> /etc/php/8.3/apache2/php.ini && \
     echo "error_reporting = E_ALL" >> /etc/php/8.3/apache2/php.ini
-
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-
-# Install CodeIgniter dependencies
-RUN composer install --no-dev --optimize-autoloader
 
 # Set working directory
 WORKDIR /var/www/html
@@ -45,14 +39,19 @@ WORKDIR /var/www/html
 # Copy project files
 COPY ./ /var/www/html
 
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install CodeIgniter dependencies
+RUN composer install --no-dev --optimize-autoloader
+
 # Rename search page to main page
 RUN if [ -f /var/www/html/public/search.html ]; then \
     mv /var/www/html/public/search.html /var/www/html/public/index.html; \
     fi
 
-# Fix CodeIgniter writable permissions recursively
-RUN chown -R www-data:www-data /var/www/html/writable && \
-    chmod -R 775 /var/www/html/writable
+# Fix writable permissions
+RUN chown -R www-data:www-data /var/www/html/writable && chmod -R 775 /var/www/html/writable
 
 # Expose web port
 EXPOSE 80
