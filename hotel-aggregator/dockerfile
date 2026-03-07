@@ -3,6 +3,7 @@ FROM ubuntu:latest
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
+ENV CI_ENVIRONMENT=production
 
 # Install PHP, required extensions, and other tools
 RUN apt-get update && apt-get install -y php-cli php-mbstring php-xml php-intl unzip curl git libicu-dev
