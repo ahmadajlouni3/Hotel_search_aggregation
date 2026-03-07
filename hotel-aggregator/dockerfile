@@ -29,4 +29,4 @@ EXPOSE 8080
 ENV CI_ENVIRONMENT = production
 
 # Run CodeIgniter server on container start
-CMD ["php", "spark", "serve", "--host=0.0.0.0", "--port=8080"]
+CMD ["sh", "-c", "php spark serve --host=0.0.0.0 --port=8080 --env=production"]
